@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Operations - {{ settings.app_name }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-tasks text-primary"></i>
+                    Operations Center
+                </h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Operations</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operation Status Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-play"></i> Running
+                    </h5>
+                    <h3 id="running-operations">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-pause"></i> Queued
+                    </h5>
+                    <h3 id="queued-operations">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-check"></i> Completed
+                    </h5>
+                    <h3 id="completed-operations">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-times"></i> Failed
+                    </h5>
+                    <h3 id="failed-operations">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operations Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Operation History</h5>
+                        <div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshOperations()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="clearHistory()">
+                                <i class="fas fa-trash"></i> Clear History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="operations-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Operation Type</th>
+                                    <th>Status</th>
+                                    <th>Started At</th>
+                                    <th>Duration</th>
+                                    <th>Items Processed</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="operations-tbody">
+                                <!-- Operations data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    loadOperations();
+    
+    // Auto-refresh every 10 seconds
+    setInterval(loadOperations, 10000);
+});
+
+function loadOperations() {
+    // Implementation will be added when API is ready
+    console.log('Loading operations...');
+}
+
+function refreshOperations() {
+    loadOperations();
+}
+
+function clearHistory() {
+    if (confirm('Are you sure you want to clear operation history?')) {
+        // Implementation will be added
+        console.log('Clearing history...');
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}Session Manager - {{ settings.app_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.session-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    background: #f9f9f9;
+}
+
+.session-card.expired {
+    background: #ffebee;
+    border-color: #f44336;
+}
+
+.session-card.active {
+    background: #e8f5e8;
+    border-color: #4caf50;
+}
+
+.manual-login-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.session-status {
+    font-weight: bold;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #4caf50;
+    color: white;
+}
+
+.status-expired {
+    background: #f44336;
+    color: white;
+}
+
+.status-none {
+    background: #757575;
+    color: white;
+}
+
+.loading-spinner {
+    display: none;
+}
+
+.loading .loading-spinner {
+    display: inline-block;
+    margin-left: 10px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="fas fa-user-shield"></i> Session Manager</h1>
+    <p class="lead">Manage your E-way Bill login sessions</p>
+
+    <!-- Current Session Status -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-info-circle"></i> Current Session Status</h5>
+        </div>
+        <div class="card-body">
+            <div id="sessionStatus">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-2">Checking session status...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Login Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-external-link-alt"></i> Manual Login</h5>
+        </div>
+        <div class="card-body">
+            <p>Click the button below to open a new browser window where you can log into the E-way portal manually. Once you complete the login, the session will be saved automatically.</p>
+            
+            <button id="startManualLogin" class="btn btn-primary manual-login-btn">
+                <i class="fas fa-external-link-alt"></i> Start Manual Login
+                <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </button>
+            
+            <div id="manualLoginStatus" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- Saved Sessions -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-list"></i> Saved Sessions</h5>
+            <button id="refreshSessions" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="sessionsList">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading sessions...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Session Load Modal -->
+<div class="modal fade" id="loadSessionModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Load Session</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to load this session?</p>
+                <div id="sessionDetails"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmLoadSession">Load Session</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    let selectedSessionId = null;
+
+    // Load current session status
+    function loadSessionStatus() {
+        $.get('/api/auth/session')
+            .done(function(data) {
+                let statusHtml = '';
+                if (data.session_active) {
+                    statusHtml = `
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-check-circle"></i> Active Session</h6>
+                            <p><strong>Session ID:</strong> ${data.session_id}</p>
+                            <p><strong>Created:</strong> ${new Date(data.created).toLocaleString()}</p>
+                            <p><strong>Expires:</strong> ${new Date(data.expires).toLocaleString()}</p>
+                        </div>
+                    `;
+                } else {
+                    statusHtml = `
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle"></i> No Active Session</h6>
+                            <p>You need to log in to use the automation features.</p>
+                        </div>
+                    `;
+                }
+                $('#sessionStatus').html(statusHtml);
+            })
+            .fail(function() {
+                $('#sessionStatus').html(`
+                    <div class="alert alert-danger">
+                        <h6><i class="fas fa-times-circle"></i> Error</h6>
+                        <p>Failed to check session status.</p>
+                    </div>
+                `);
+            });
+    }
+
+    // Load saved sessions
+    function loadSessions() {
+        $.get('/api/auth/sessions')
+            .done(function(data) {
+                if (data.success && data.sessions.length > 0) {
+                    let sessionsHtml = '';
+                    data.sessions.forEach(function(session) {
+                        let statusClass = session.expired ? 'expired' : 'active';
+                        let statusBadge = session.expired ? 
+                            '<span class="session-status status-expired">Expired</span>' :
+                            '<span class="session-status status-active">Active</span>';
+                        
+                        sessionsHtml += `
+                            <div class="session-card ${statusClass}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6>${session.session_id}</h6>
+                                        <p class="mb-1"><strong>Created:</strong> ${new Date(session.created).toLocaleString()}</p>
+                                        <p class="mb-1"><strong>Expires:</strong> ${new Date(session.expires).toLocaleString()}</p>
+                                        <p class="mb-0"><strong>Size:</strong> ${(session.size / 1024).toFixed(1)} KB</p>
+                                    </div>
+                                    <div class="text-right">
+                                        ${statusBadge}
+                                        <br>
+                                        ${!session.expired ? 
+                                            `<button class="btn btn-sm btn-success mt-2 load-session-btn" data-session-id="${session.session_id}">
+                                                <i class="fas fa-play"></i> Load
+                                            </button>` : 
+                                            '<button class="btn btn-sm btn-secondary mt-2" disabled>Expired</button>'
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    $('#sessionsList').html(sessionsHtml);
+                } else {
+                    $('#sessionsList').html(`
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i>
+                            <p class="mb-0">No saved sessions found. Use manual login to create your first session.</p>
+                        </div>
+                    `);
+                }
+            })
+            .fail(function() {
+                $('#sessionsList').html(`
+                    <div class="alert alert-danger text-center">
+                        <i class="fas fa-times-circle"></i>
+                        <p class="mb-0">Failed to load sessions.</p>
+                    </div>
+                `);
+            });
+    }
+
+    // Start manual login
+    $('#startManualLogin').click(function() {
+        const btn = $(this);
+        btn.addClass('loading').prop('disabled', true);
+        $('#manualLoginStatus').html('');
+
+        $.post('/api/auth/manual-login')
+            .done(function(data) {
+                if (data.success) {
+                    $('#manualLoginStatus').html(`
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            ${data.message}
+                        </div>
+                    `);
+                    // Reload status and sessions
+                    loadSessionStatus();
+                    loadSessions();
+                } else {
+                    $('#manualLoginStatus').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i>
+                            ${data.message}
+                        </div>
+                    `);
+                }
+            })
+            .fail(function() {
+                $('#manualLoginStatus').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle"></i>
+                        Manual login failed. Please try again.
+                    </div>
+                `);
+            })
+            .always(function() {
+                btn.removeClass('loading').prop('disabled', false);
+            });
+    });
+
+    // Load session button click
+    $(document).on('click', '.load-session-btn', function() {
+        selectedSessionId = $(this).data('session-id');
+        $('#sessionDetails').html(`
+            <p><strong>Session ID:</strong> ${selectedSessionId}</p>
+            <p>This will load the selected session for use with automation features.</p>
+        `);
+        $('#loadSessionModal').modal('show');
+    });
+
+    // Confirm load session
+    $('#confirmLoadSession').click(function() {
+        if (!selectedSessionId) return;
+
+        const btn = $(this);
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> Loading...');
+
+        $.post(`/api/auth/load-session/${selectedSessionId}`)
+            .done(function(data) {
+                $('#loadSessionModal').modal('hide');
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadSessionStatus();
+                } else {
+                    showAlert('danger', data.message);
+                }
+            })
+            .fail(function() {
+                $('#loadSessionModal').modal('hide');
+                showAlert('danger', 'Failed to load session.');
+            })
+            .always(function() {
+                btn.prop('disabled', false).html('Load Session');
+            });
+    });
+
+    // Refresh sessions
+    $('#refreshSessions').click(function() {
+        const btn = $(this);
+        btn.html('<i class="fas fa-spin fa-sync-alt"></i> Refreshing...');
+        loadSessions();
+        loadSessionStatus();
+        setTimeout(function() {
+            btn.html('<i class="fas fa-sync-alt"></i> Refresh');
+        }, 1000);
+    });
+
+    function showAlert(type, message) {
+        const alert = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('body').prepend(alert);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+    }
+
+    // Initial load
+    loadSessionStatus();
+    loadSessions();
+});
+</script>
+{% endblock %}

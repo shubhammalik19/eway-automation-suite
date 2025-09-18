@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ settings.app_name }}{% endblock %}</title>
+    
+    <!-- Local CSS Files -->
+    <link href="/static/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/vendor/font-awesome.min.css" rel="stylesheet">
+    <link href="/static/css/vendor/jquery-ui.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-light">
+    <!-- Navigation -->
+    {% include 'components/navbar.html' %}
+
+    <!-- Main Content -->
+    <main class="container mt-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% include 'components/footer.html' %}
+
+    <!-- Modals -->
+    {% block modals %}
+        {% include 'components/progress_modal.html' %}
+    {% endblock %}
+
+    <!-- Local JavaScript Files -->
+    <script src="/static/js/vendor/jquery.min.js"></script>
+    <script src="/static/js/vendor/jquery-ui.min.js"></script>
+    <script src="/static/js/vendor/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

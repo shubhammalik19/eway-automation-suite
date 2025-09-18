@@ -1,0 +1,224 @@
+{
+  "test_suite": "MCP Playwright Automation",
+  "timestamp": "2025-09-17T20:13:33.299981",
+  "summary": {
+    "total_tests": 7,
+    "passed": 6,
+    "failed": 1,
+    "total_time": 28.25
+  },
+  "results": [
+    {
+      "test_name": "Health Check",
+      "method": "GET",
+      "endpoint": "/api/automation/health",
+      "status_code": 200,
+      "execution_time": 3.58,
+      "success": true,
+      "response": {
+        "status": "healthy",
+        "message": "Automation system is operational",
+        "details": {
+          "status": "healthy",
+          "timestamp": "2025-09-17T20:13:05.055686",
+          "components": {
+            "browser": "healthy",
+            "portal": "healthy",
+            "screenshots": "healthy"
+          },
+          "test_screenshot": "data/screenshots/health_check_20250917_201308.png"
+        }
+      },
+      "timestamp": "2025-09-17T20:13:08.638770"
+    },
+    {
+      "test_name": "System Status",
+      "method": "GET",
+      "endpoint": "/api/automation/status",
+      "status_code": 200,
+      "execution_time": 0.0,
+      "success": true,
+      "response": {
+        "system_status": "operational",
+        "timestamp": "2025-09-17T20:13:08.639386",
+        "configuration": {
+          "browser_type": "chromium",
+          "headless": true,
+          "timeout": 30000,
+          "slow_mo": 0
+        },
+        "endpoints": {
+          "health_check": "/api/automation/health",
+          "login_flow_test": "/api/automation/test/login-flow",
+          "full_login_test": "/api/automation/test/full-login",
+          "browser_capabilities": "/api/automation/test/browser-capabilities",
+          "debug_screenshot": "/api/automation/debug/screenshot",
+          "portal_elements": "/api/automation/test/portal-elements"
+        },
+        "features": {
+          "mcp_testing": true,
+          "screenshot_capture": true,
+          "element_analysis": true,
+          "multi_browser_support": true,
+          "session_management": true
+        }
+      },
+      "timestamp": "2025-09-17T20:13:08.639917"
+    },
+    {
+      "test_name": "Browser Capabilities Test",
+      "method": "GET",
+      "endpoint": "/api/automation/test/browser-capabilities",
+      "status_code": 200,
+      "execution_time": 1.26,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "Browser capabilities test completed",
+        "capabilities": {
+          "browsers_available": [
+            "chromium",
+            "firefox"
+          ],
+          "current_config": {
+            "browser_type": "chromium",
+            "headless": true,
+            "viewport": {
+              "width": 1366,
+              "height": 768
+            },
+            "locale": "en-IN",
+            "timezone": "Asia/Kolkata"
+          },
+          "test_results": {
+            "chromium": "available",
+            "firefox": "available",
+            "webkit": "unavailable"
+          }
+        }
+      },
+      "timestamp": "2025-09-17T20:13:09.895401"
+    },
+    {
+      "test_name": "Login Flow Test",
+      "method": "POST",
+      "endpoint": "/api/automation/test/login-flow",
+      "status_code": 200,
+      "execution_time": 4.9,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "Login flow test completed",
+        "test_results": {
+          "test_name": "login_flow_test",
+          "timestamp": "2025-09-17T20:13:10.145119",
+          "steps": [
+            {
+              "step": "browser_init",
+              "status": "success"
+            },
+            {
+              "step": "navigate_to_login",
+              "status": "success",
+              "url": "https://ewaybillgst.gov.in/Login.aspx"
+            },
+            {
+              "step": "form_elements_detected",
+              "status": "success",
+              "username_field": true,
+              "password_field": true
+            },
+            {
+              "step": "captcha_detection",
+              "status": "success",
+              "captcha_present": true
+            }
+          ],
+          "success": true,
+          "screenshots": [
+            "data/screenshots/test_login_page_20250917_201314.png"
+          ]
+        }
+      },
+      "timestamp": "2025-09-17T20:13:14.794531"
+    },
+    {
+      "test_name": "Portal Elements Analysis",
+      "method": "GET",
+      "endpoint": "/api/automation/test/portal-elements",
+      "status_code": 200,
+      "execution_time": 5.18,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "Portal elements analyzed successfully",
+        "elements": {
+          "form_fields": {
+            "username_field": {
+              "selector": "input[name*='username']",
+              "attributes": {
+                "name": "txt_username",
+                "id": "txt_username",
+                "placeholder": "Username",
+                "type": "text"
+              },
+              "found": true
+            },
+            "password_field": {
+              "selector": "input[type='password']",
+              "attributes": {
+                "name": "txt_password",
+                "id": "txt_password",
+                "placeholder": "Password"
+              },
+              "found": true
+            }
+          },
+          "buttons": {
+            "login_button": {
+              "selector": "input[type='submit']",
+              "text": "Login",
+              "found": true
+            }
+          },
+          "links": {},
+          "images": {},
+          "structure": {
+            "captcha_present": true,
+            "page_title": "Login | E-WayBill System",
+            "current_url": "https://ewaybillgst.gov.in/Login.aspx"
+          }
+        },
+        "screenshot_path": "data/screenshots/portal_analysis_20250917_201319.png",
+        "analysis_timestamp": "2025-09-17T20:13:19.944639"
+      },
+      "timestamp": "2025-09-17T20:13:19.971565"
+    },
+    {
+      "test_name": "Debug Screenshot",
+      "method": "POST",
+      "endpoint": "/api/automation/debug/screenshot?url=https://ewaybillgst.gov.in/Login.aspx",
+      "status_code": 200,
+      "execution_time": 6.12,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "Screenshot captured successfully",
+        "screenshot_path": "data/screenshots/debug_manual_20250917_201325.png",
+        "url": "https://ewaybillgst.gov.in/Login.aspx",
+        "timestamp": "2025-09-17T20:13:26.065232"
+      },
+      "timestamp": "2025-09-17T20:13:26.090987"
+    },
+    {
+      "test_name": "Full Login Form Test",
+      "method": "POST",
+      "endpoint": "/api/automation/test/full-login",
+      "status_code": 0,
+      "execution_time": 7.21,
+      "success": false,
+      "error": "Server disconnected",
+      "timestamp": "2025-09-17T20:13:33.299804"
+    }
+  ]
+}

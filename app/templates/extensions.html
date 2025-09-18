@@ -1,0 +1,624 @@
+{% extends "base.html" %}
+
+{% block title %}E-way Bill Extensions - {{ settings.app_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .extension-card {
+        transition: transform 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .extension-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .upload-area {
+        border: 2px dashed #007bff;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        margin: 1rem 0;
+        transition: border-color 0.3s ease;
+    }
+    
+    .upload-area.dragover {
+        border-color: #28a745;
+        background-color: #f8f9fa;
+    }
+    
+    .result-badge {
+        font-size: 0.8em;
+    }
+    
+    .progress-container {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-expand-arrows-alt text-primary"></i>
+                    E-way Bill Extensions
+                </h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Extensions</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Status Alert -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div id="session-alert" class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle"></i>
+                <span id="session-status-text">Checking session status...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extension Options -->
+    <div class="row mb-4">
+        <!-- Option 1: Single Extension -->
+        <div class="col-md-4">
+            <div class="card extension-card h-100" data-bs-toggle="modal" data-bs-target="#singleExtensionModal">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-invoice fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Single Extension</h5>
+                    <p class="card-text">Extend one E-way bill at a time with custom parameters</p>
+                    <div class="mt-auto">
+                        <span class="badge bg-primary">Manual Input</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Option 2: CSV Bulk Extension -->
+        <div class="col-md-4">
+            <div class="card extension-card h-100" data-bs-toggle="modal" data-bs-target="#csvExtensionModal">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-csv fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">CSV Bulk Extension</h5>
+                    <p class="card-text">Upload CSV file to extend multiple E-way bills</p>
+                    <div class="mt-auto">
+                        <span class="badge bg-success">File Upload</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Option 3: Auto-Extend Expiring -->
+        <div class="col-md-4">
+            <div class="card extension-card h-100" data-bs-toggle="modal" data-bs-target="#autoExtendModal">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Auto-Extend Expiring</h5>
+                    <p class="card-text">Automatically extend all expiring E-way bills</p>
+                    <div class="mt-auto">
+                        <span class="badge bg-warning">Automated</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Extensions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Extensions</h5>
+                        <button class="btn btn-outline-primary btn-sm" onclick="loadExtensionHistory()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="extensions-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Operation</th>
+                                    <th>Type</th>
+                                    <th>Timestamp</th>
+                                    <th>Total</th>
+                                    <th>Success</th>
+                                    <th>Failed</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="extensions-tbody">
+                                <!-- Extension history will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Extension Modal -->
+    <div class="modal fade" id="singleExtensionModal" tabindex="-1" aria-labelledby="singleExtensionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="singleExtensionModalLabel">
+                        <i class="fas fa-file-invoice text-primary"></i>
+                        Single E-way Bill Extension
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="single-extension-form">
+                        <div class="mb-3">
+                            <label for="ewb-number" class="form-label">E-way Bill Number *</label>
+                            <input type="text" class="form-control" id="ewb-number" required 
+                                   placeholder="Enter E-way bill number">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new-destination" class="form-label">New Destination *</label>
+                            <input type="text" class="form-control" id="new-destination" required 
+                                   placeholder="Enter new destination">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="transport-mode" class="form-label">Transport Mode</label>
+                            <select class="form-select" id="transport-mode">
+                                <option value="Road">Road</option>
+                                <option value="Rail">Rail</option>
+                                <option value="Air">Air</option>
+                                <option value="Ship">Ship</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3" id="vehicle-number-group">
+                            <label for="vehicle-number" class="form-label">Vehicle Number</label>
+                            <input type="text" class="form-control" id="vehicle-number" 
+                                   placeholder="Enter vehicle number (required for Road transport)">
+                        </div>
+                    </form>
+                    
+                    <div class="progress-container">
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div id="progress-text" class="text-center"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submit-single-extension">
+                        <i class="fas fa-paper-plane"></i> Extend E-way Bill
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSV Extension Modal -->
+    <div class="modal fade" id="csvExtensionModal" tabindex="-1" aria-labelledby="csvExtensionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="csvExtensionModalLabel">
+                        <i class="fas fa-file-csv text-success"></i>
+                        CSV Bulk Extension
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Upload CSV File</h6>
+                            <div class="upload-area" id="csv-upload-area">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <p>Drag & drop your CSV file here</p>
+                                <p class="text-muted">or</p>
+                                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('csv-file-input').click()">
+                                    <i class="fas fa-folder-open"></i> Browse Files
+                                </button>
+                                <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                            </div>
+                            
+                            <div id="csv-preview" class="mt-3" style="display: none;">
+                                <h6>File Preview</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead id="csv-preview-head"></thead>
+                                        <tbody id="csv-preview-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>CSV Format Requirements</h6>
+                            <div class="alert alert-info">
+                                <h6>Required Columns:</h6>
+                                <ul class="mb-2">
+                                    <li><code>ewb_number</code> - E-way bill number</li>
+                                    <li><code>new_destination</code> - New destination</li>
+                                </ul>
+                                <h6>Optional Columns:</h6>
+                                <ul class="mb-0">
+                                    <li><code>transport_mode</code> - Road/Rail/Air/Ship</li>
+                                    <li><code>vehicle_number</code> - Vehicle number</li>
+                                </ul>
+                            </div>
+                            
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="downloadCSVTemplate()">
+                                <i class="fas fa-download"></i> Download Template
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div id="csv-progress-text" class="text-center"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="submit-csv-extension" disabled>
+                        <i class="fas fa-upload"></i> Process CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-Extend Modal -->
+    <div class="modal fade" id="autoExtendModal" tabindex="-1" aria-labelledby="autoExtendModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="autoExtendModalLabel">
+                        <i class="fas fa-clock text-warning"></i>
+                        Auto-Extend Expiring Bills
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Warning:</strong> This will automatically extend all E-way bills expiring within the specified threshold.
+                    </div>
+                    
+                    <form id="auto-extend-form">
+                        <div class="mb-3">
+                            <label for="days-threshold" class="form-label">Days Threshold</label>
+                            <input type="number" class="form-control" id="days-threshold" value="1" min="1" max="30" required>
+                            <div class="form-text">Bills expiring within this many days will be extended</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="default-destination" class="form-label">Default New Destination *</label>
+                            <input type="text" class="form-control" id="default-destination" required 
+                                   placeholder="Enter default destination for all extensions">
+                        </div>
+                    </form>
+                    
+                    <div class="progress-container">
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div id="auto-extend-progress-text" class="text-center"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" id="submit-auto-extend">
+                        <i class="fas fa-magic"></i> Start Auto-Extension
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    checkSessionStatus();
+    loadExtensionHistory();
+    
+    // Transport mode change handler
+    $('#transport-mode').change(function() {
+        const vehicleGroup = $('#vehicle-number-group');
+        if ($(this).val() === 'Road') {
+            vehicleGroup.show();
+            $('#vehicle-number').attr('required', true);
+        } else {
+            vehicleGroup.hide();
+            $('#vehicle-number').attr('required', false);
+        }
+    });
+    
+    // CSV file upload handlers
+    setupCSVUpload();
+    
+    // Form submission handlers
+    $('#submit-single-extension').click(submitSingleExtension);
+    $('#submit-csv-extension').click(submitCSVExtension);
+    $('#submit-auto-extend').click(submitAutoExtend);
+});
+
+function checkSessionStatus() {
+    $.get('/api/extensions/status')
+        .done(function(data) {
+            const alertDiv = $('#session-alert');
+            const statusText = $('#session-status-text');
+            
+            if (data.active_sessions > 0) {
+                alertDiv.removeClass('alert-info alert-danger').addClass('alert-success');
+                statusText.html('<i class="fas fa-check-circle"></i> Session active - Ready for extensions');
+            } else {
+                alertDiv.removeClass('alert-info alert-success').addClass('alert-danger');
+                statusText.html('<i class="fas fa-exclamation-circle"></i> No active session - Please <a href="/login">login</a> first');
+            }
+        })
+        .fail(function() {
+            $('#session-status-text').html('<i class="fas fa-times-circle"></i> Unable to check session status');
+        });
+}
+
+function loadExtensionHistory() {
+    $.get('/api/extensions/history')
+        .done(function(data) {
+            const tbody = $('#extensions-tbody');
+            tbody.empty();
+            
+            if (data.history && data.history.length > 0) {
+                data.history.forEach(function(item) {
+                    const row = `
+                        <tr>
+                            <td>${item.filename}</td>
+                            <td><span class="badge bg-${getTypeBadgeColor(item.type)}">${item.type}</span></td>
+                            <td>${new Date(item.timestamp).toLocaleString()}</td>
+                            <td>${item.total_records}</td>
+                            <td><span class="badge bg-success">${item.successful}</span></td>
+                            <td><span class="badge bg-danger">${item.failed}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewExtensionDetails('${item.filename}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            } else {
+                tbody.append('<tr><td colspan="7" class="text-center text-muted">No extension history found</td></tr>');
+            }
+        });
+}
+
+function getTypeBadgeColor(type) {
+    const colors = { 'single': 'primary', 'csv': 'success', 'auto': 'warning' };
+    return colors[type] || 'secondary';
+}
+
+function setupCSVUpload() {
+    const uploadArea = $('#csv-upload-area');
+    const fileInput = $('#csv-file-input');
+    
+    // Drag and drop
+    uploadArea.on('dragover', function(e) {
+        e.preventDefault();
+        $(this).addClass('dragover');
+    });
+    
+    uploadArea.on('dragleave', function(e) {
+        e.preventDefault();
+        $(this).removeClass('dragover');
+    });
+    
+    uploadArea.on('drop', function(e) {
+        e.preventDefault();
+        $(this).removeClass('dragover');
+        
+        const files = e.originalEvent.dataTransfer.files;
+        if (files.length > 0) {
+            handleCSVFile(files[0]);
+        }
+    });
+    
+    // File input change
+    fileInput.change(function(e) {
+        if (e.target.files.length > 0) {
+            handleCSVFile(e.target.files[0]);
+        }
+    });
+}
+
+function handleCSVFile(file) {
+    if (!file.name.endsWith('.csv')) {
+        alert('Please select a CSV file');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const csv = e.target.result;
+        previewCSV(csv);
+        $('#submit-csv-extension').prop('disabled', false);
+    };
+    reader.readAsText(file);
+}
+
+function previewCSV(csvText) {
+    const lines = csvText.split('\n');
+    const headers = lines[0].split(',');
+    
+    let headerHtml = '<tr>';
+    headers.forEach(header => {
+        headerHtml += `<th>${header.trim()}</th>`;
+    });
+    headerHtml += '</tr>';
+    
+    let bodyHtml = '';
+    for (let i = 1; i < Math.min(lines.length, 6); i++) {
+        if (lines[i].trim()) {
+            bodyHtml += '<tr>';
+            const cells = lines[i].split(',');
+            cells.forEach(cell => {
+                bodyHtml += `<td>${cell.trim()}</td>`;
+            });
+            bodyHtml += '</tr>';
+        }
+    }
+    
+    $('#csv-preview-head').html(headerHtml);
+    $('#csv-preview-body').html(bodyHtml);
+    $('#csv-preview').show();
+}
+
+function submitSingleExtension() {
+    const data = {
+        ewb_number: $('#ewb-number').val(),
+        new_destination: $('#new-destination').val(),
+        transport_mode: $('#transport-mode').val(),
+        vehicle_number: $('#vehicle-number').val()
+    };
+    
+    if (!data.ewb_number || !data.new_destination) {
+        alert('Please fill all required fields');
+        return;
+    }
+    
+    showProgress('#singleExtensionModal', 'Processing extension...');
+    
+    $.post('/api/extensions/single', data)
+        .done(function(response) {
+            hideProgress('#singleExtensionModal');
+            if (response.success) {
+                alert('Extension completed successfully!');
+                $('#singleExtensionModal').modal('hide');
+                loadExtensionHistory();
+            } else {
+                alert('Extension failed: ' + response.message);
+            }
+        })
+        .fail(function() {
+            hideProgress('#singleExtensionModal');
+            alert('Extension request failed');
+        });
+}
+
+function submitCSVExtension() {
+    const fileInput = document.getElementById('csv-file-input');
+    if (!fileInput.files[0]) {
+        alert('Please select a CSV file');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    
+    showProgress('#csvExtensionModal', 'Processing CSV file...');
+    
+    $.ajax({
+        url: '/api/extensions/csv',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            hideProgress('#csvExtensionModal');
+            if (response.success) {
+                alert(`CSV processing completed! Success: ${response.data.successful}, Failed: ${response.data.failed}`);
+                $('#csvExtensionModal').modal('hide');
+                loadExtensionHistory();
+            } else {
+                alert('CSV processing failed: ' + response.message);
+            }
+        },
+        error: function() {
+            hideProgress('#csvExtensionModal');
+            alert('CSV processing request failed');
+        }
+    });
+}
+
+function submitAutoExtend() {
+    const data = {
+        days_threshold: parseInt($('#days-threshold').val()),
+        default_destination: $('#default-destination').val()
+    };
+    
+    if (!data.default_destination) {
+        alert('Please enter a default destination');
+        return;
+    }
+    
+    if (!confirm(`This will automatically extend all bills expiring within ${data.days_threshold} day(s). Continue?`)) {
+        return;
+    }
+    
+    showProgress('#autoExtendModal', 'Starting auto-extension...');
+    
+    $.post('/api/extensions/auto-extend', data)
+        .done(function(response) {
+            hideProgress('#autoExtendModal');
+            if (response.success) {
+                alert(`Auto-extension completed! Success: ${response.data.successful}, Failed: ${response.data.failed}`);
+                $('#autoExtendModal').modal('hide');
+                loadExtensionHistory();
+            } else {
+                alert('Auto-extension failed: ' + response.message);
+            }
+        })
+        .fail(function() {
+            hideProgress('#autoExtendModal');
+            alert('Auto-extension request failed');
+        });
+}
+
+function showProgress(modalId, text) {
+    $(modalId + ' .progress-container').show();
+    $(modalId + ' .progress-bar').css('width', '100%');
+    $(modalId + ' [id$="progress-text"]').text(text);
+    $(modalId + ' .modal-footer button').prop('disabled', true);
+}
+
+function hideProgress(modalId) {
+    $(modalId + ' .progress-container').hide();
+    $(modalId + ' .progress-bar').css('width', '0%');
+    $(modalId + ' .modal-footer button').prop('disabled', false);
+}
+
+function viewExtensionDetails(filename) {
+    window.open(`/api/extensions/history/${filename}`, '_blank');
+}
+
+function downloadCSVTemplate() {
+    const template = [
+        ['ewb_number', 'new_destination', 'transport_mode', 'vehicle_number'],
+        ['391234567890', 'New Delhi', 'Road', 'DL01AB1234'],
+        ['391234567891', 'Mumbai', 'Rail', '']
+    ];
+    
+    const csvContent = template.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'eway_extension_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

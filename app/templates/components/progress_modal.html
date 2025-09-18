@@ -1,0 +1,49 @@
+<!-- Progress Modal -->
+<div class="modal fade" id="progress-modal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-cog fa-spin"></i>
+                    <span id="operation-title">Operation in Progress</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" id="modal-close-btn" style="display: none;"></button>
+            </div>
+            <div class="modal-body">
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%" id="operation-progress">
+                        <span id="progress-text">0%</span>
+                    </div>
+                </div>
+                <div class="status-info">
+                    <p id="operation-status" class="mb-2">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        Initializing operation...
+                    </p>
+                    <div id="operation-details" class="small text-muted border-start border-3 border-primary ps-3">
+                        <i class="fas fa-clock me-1"></i>
+                        Preparing automation environment...
+                    </div>
+                </div>
+                <div id="operation-logs" class="mt-3" style="display: none;">
+                    <h6 class="text-muted">
+                        <i class="fas fa-terminal me-2"></i>
+                        Operation Logs
+                    </h6>
+                    <div class="bg-dark text-light p-2 rounded small" style="max-height: 200px; overflow-y: auto;">
+                        <div id="log-content"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="display: none;" id="close-button">
+                    Close
+                </button>
+                <button type="button" class="btn btn-danger" onclick="cancelOperation()" id="cancel-button">
+                    <i class="fas fa-stop"></i> Cancel Operation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

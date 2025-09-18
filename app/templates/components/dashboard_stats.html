@@ -1,0 +1,115 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-gradient" style="background: linear-gradient(45deg, #007bff, #0056b3);">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-white">
+                <i class="fas fa-chart-bar"></i>
+                Dashboard Statistics
+            </h5>
+            <div class="text-white-50 small">
+                <i class="fas fa-sync-alt" id="refresh-stats" style="cursor: pointer;" title="Refresh Stats"></i>
+                <span class="ms-2">Last updated: <span id="last-updated">Never</span></span>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <!-- Total Bills -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-item">
+                    <div class="stats-icon text-primary mb-2">
+                        <i class="fas fa-file-invoice fa-2x"></i>
+                    </div>
+                    <h3 class="stats-number text-primary" id="total-bills">0</h3>
+                    <small class="text-muted">Total E-way Bills</small>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Extensions -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-item">
+                    <div class="stats-icon text-warning mb-2">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h3 class="stats-number text-warning" id="pending-extensions">0</h3>
+                    <small class="text-muted">Pending Extensions</small>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-warning" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Successful Extensions -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-item">
+                    <div class="stats-icon text-success mb-2">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                    <h3 class="stats-number text-success" id="successful-extensions">0</h3>
+                    <small class="text-muted">Successful Extensions</small>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-success" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Failed Extensions -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-item">
+                    <div class="stats-icon text-danger mb-2">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <h3 class="stats-number text-danger" id="failed-extensions">0</h3>
+                    <small class="text-muted">Failed Extensions</small>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-danger" style="width: 15%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <hr>
+                <h6 class="text-muted mb-3">
+                    <i class="fas fa-bolt text-warning me-2"></i>
+                    Quick Actions
+                </h6>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshStats()">
+                        <i class="fas fa-sync-alt me-1"></i> Refresh Stats
+                    </button>
+                    <button type="button" class="btn btn-outline-info btn-sm" onclick="showRecentOperations()">
+                        <i class="fas fa-history me-1"></i> Recent Operations
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm" onclick="exportData()">
+                        <i class="fas fa-download me-1"></i> Export Data
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showSettings()">
+                        <i class="fas fa-cog me-1"></i> Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="row mt-4" id="recent-activity" style="display: none;">
+            <div class="col-12">
+                <h6 class="text-muted mb-3">
+                    <i class="fas fa-clock text-info me-2"></i>
+                    Recent Activity
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-borderless">
+                        <tbody id="recent-operations-list">
+                            <!-- Recent operations will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
