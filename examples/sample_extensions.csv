@@ -1,0 +1,4 @@
+eway_bill_number,current_validity,extend_to_date,vehicle_number,reason
+123456789012,2025-09-20,2025-09-25,MH01AB1234,Delay in transportation
+987654321098,2025-09-21,2025-09-26,DL05CD5678,Vehicle breakdown
+456789123456,2025-09-22,2025-09-27,KA03EF9012,Traffic congestion

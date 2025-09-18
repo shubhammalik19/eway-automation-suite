@@ -400,6 +400,34 @@ For support, please:
 - [ ] Automated backup system
 - [ ] Integration with external ERP systems
 
+## ⚖️ Legal & Compliance
+
+**🚨 IMPORTANT: Read before using this software**
+
+- **[Terms of Service](TERMS_OF_SERVICE.md)** - Complete legal disclaimers and user responsibilities
+- **[Legal Notice](LEGAL_NOTICE.md)** - Compliance requirements and warnings
+- **[License](LICENSE)** - MIT License for code usage
+
+**By using this software, you accept all terms and take full responsibility for legal compliance.**
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Disclaimer**: The MIT License applies to the code only. Users are solely responsible for compliance with all applicable laws and regulations when using this software.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+**Contributors must agree to the terms of service and ensure all contributions are legal and ethical.**
+
+## 📞 Support
+
+- **Technical Issues**: Open an issue on GitHub
+- **Legal Questions**: Consult with your legal team
+- **Security Reports**: Follow responsible disclosure practices
+
 ---
 
-**Made with ❤️ for the GST community**
+**Made with ❤️ for the GST community | USE AT YOUR OWN RISK**

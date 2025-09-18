@@ -1,0 +1,58 @@
+ewayauto/
+├── app/
+│   ├── __init__.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   └── routes/
+│   │       ├── __init__.py
+│   │       ├── auth.py
+│   │       ├── automation.py
+│   │       └── dashboard.py
+│   ├── automation/
+│   │   ├── __init__.py
+│   │   └── eway_automation.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── credentials.py
+│   │   └── logging.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── database.py
+│   │   └── schemas.py
+│   ├── static/
+│   │   ├── favicon.ico
+│   │   ├── css/
+│   │   │   └── main.css
+│   │   ├── js/
+│   │   │   └── main.js
+│   │   └── screenshots/  # Created automatically
+│   └── templates/
+│       ├── base.html
+│       ├── index.html
+│       └── components/
+├── data/  # Created automatically
+│   └── ewayauto.db
+├── logs/  # Created automatically
+│   ├── ewayauto.log
+│   └── errors.log
+├── venv/  # Created by user
+│   └── (virtual environment files)
+├── examples/
+│   ├── README.md
+│   ├── sample_extensions.csv
+│   └── folder_structure.txt
+├── .env  # Copy from .env.example
+├── .env.example
+├── .gitignore
+├── LICENSE
+├── main.py
+├── README.md
+├── requirements.txt
+└── SETUP.md
+
+Notes:
+- Folders marked "Created automatically" are generated when the app runs
+- Copy .env.example to .env and configure with your settings
+- Create venv/ using: python -m venv venv
+- Install dependencies: pip install -r requirements.txt
