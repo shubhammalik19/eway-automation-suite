@@ -1,0 +1,8 @@
+# This file keeps the data directory in git
+# The data directory will contain:
+# - ewayauto.db (SQLite database)
+# - backups/ (database backups) 
+# - exports/ (exported reports)
+# - temp/ (temporary files)
+#
+# All actual data files are excluded by .gitignore for security

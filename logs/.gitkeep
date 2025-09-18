@@ -1,0 +1,8 @@
+# This file keeps the logs directory in git
+# The logs directory will contain:
+# - ewayauto.log (application logs)
+# - errors.log (error logs)
+# - access.log (API access logs)
+# - debug.log (debug information)
+#
+# All actual log files are excluded by .gitignore for security

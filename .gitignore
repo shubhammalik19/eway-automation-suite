@@ -173,14 +173,16 @@ cython_debug/
 *.vsix
 
 # Application specific files
-# Database files
-data/
+# Database files - allow folder but exclude contents
+data/*
+!data/.gitkeep
 *.db
 *.sqlite
 *.sqlite3
 
-# Log files
-logs/
+# Log files - allow folder but exclude contents
+logs/*
+!logs/.gitkeep
 *.log
 
 # Screenshots and temporary files
